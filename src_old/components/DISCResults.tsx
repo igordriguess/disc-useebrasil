@@ -150,7 +150,7 @@ const DISCResults = ({ scores, userInfo, onReset, resetButtonLabel = "Refazer" }
   };
 
   const handleDownloadPDF = async () => {
-    toast.info("Gerando relatório...");
+    toast.info("Gerando relatório executivo em PDF...");
 
     try {
       const jsPDFModule = await import("jspdf");
@@ -273,7 +273,7 @@ const DISCResults = ({ scores, userInfo, onReset, resetButtonLabel = "Refazer" }
       });
 
       doc.save(`DISC ${userInfo.nome} ${userInfo.sobrenome}.pdf`);
-      toast.success("Relatório gerado com sucesso!");
+      toast.success("Relatório executivo em PDF gerado com sucesso!");
     } catch {
       toast.error("Erro ao gerar PDF.");
     }

@@ -1,4 +1,4 @@
-import { KeyboardEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Eye, LogOut, RefreshCcw, Trash2 } from "lucide-react";
 import DISCResults from "@/components/DISCResults";
 import { Button } from "@/components/ui/button";
@@ -81,13 +81,6 @@ const AdminDashboard = ({ onExit }: AdminDashboardProps) => {
     } finally {
       setDeletingId(null);
       setPendingDeleteEntry(null);
-    }
-  };
-
-  const handleCardKeyDown = (event: KeyboardEvent<HTMLDivElement>, entryId: string) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      setSelectedId(entryId);
     }
   };
 
@@ -204,14 +197,7 @@ const AdminDashboard = ({ onExit }: AdminDashboardProps) => {
           ) : (
             <div className="space-y-3">
               {entries.map((entry) => (
-                <div
-                  key={entry.id}
-                  className="cursor-pointer rounded-xl border border-glass-border/70 bg-secondary/25 p-4 transition-colors hover:bg-secondary/40"
-                  onClick={() => setSelectedId(entry.id)}
-                  onKeyDown={(event) => handleCardKeyDown(event, entry.id)}
-                  role="button"
-                  tabIndex={0}
-                >
+                <div key={entry.id} className="rounded-xl border border-glass-border/70 bg-secondary/25 p-4">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="space-y-1">
                       <p className="text-sm font-semibold text-foreground">
@@ -236,10 +222,7 @@ const AdminDashboard = ({ onExit }: AdminDashboardProps) => {
                       </Button>
                       <Button
                         variant="destructive"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          requestDelete(entry);
-                        }}
+                        onClick={() => requestDelete(entry)}
                         className="rounded-xl"
                         disabled={deletingId === entry.id}
                       >

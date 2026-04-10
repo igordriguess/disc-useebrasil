@@ -85,9 +85,9 @@ const Index = () => {
 
       setScores(assessmentScores);
       window.scrollTo({ top: 0, behavior: "smooth" });
-      toast.success(`Avaliação salva com sucesso!`);
+      toast.success(`Avaliação salva em ${saveResult.entry.fileName}.`);
     } catch {
-      toast.error("Não foi possível salvar a avaliação... Tente novamente.");
+      toast.error("Não foi possível salvar a avaliação no diretório local.");
     } finally {
       setIsSavingAssessment(false);
     }
@@ -133,47 +133,35 @@ const Index = () => {
     toast.success("Sessão administrativa encerrada.");
   };
 
-  const handleGoToInitialMenu = () => {
-    setAdminDialogOpen(false);
-    setAdminUsername("");
-    setAdminPassword("");
-    setIsAuthenticating(false);
-    setIsAdminMode(false);
-    handleReset();
-  };
-
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-background">
       {/* Background - logo-inspired smiley icons */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden text-[#8CCBFF]">
-        <UseeIcon className="absolute top-[8%] left-[3%] h-36 w-36 opacity-35" />
-        <UseeIcon className="absolute top-[55%] right-[5%] h-52 w-52 opacity-30" />
-        <UseeIcon className="absolute bottom-[10%] left-[18%] h-28 w-28 opacity-35" />
-        <UseeIcon className="absolute top-[25%] right-[22%] h-24 w-24 rotate-12 opacity-30" />
-        <UseeIcon className="absolute top-[75%] left-[55%] h-40 w-40 -rotate-6 opacity-25" />
-        <UseeIcon className="absolute top-[3%] right-[40%] h-20 w-20 rotate-6 opacity-30" />
+      <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-[0.04]">
+        <UseeIcon className="absolute top-[8%] left-[3%] w-36 h-36 text-primary" />
+        <UseeIcon className="absolute top-[55%] right-[5%] w-52 h-52 text-primary" />
+        <UseeIcon className="absolute bottom-[10%] left-[18%] w-28 h-28 text-primary" />
+        <UseeIcon className="absolute top-[25%] right-[22%] w-24 h-24 text-primary rotate-12" />
+        <UseeIcon className="absolute top-[75%] left-[55%] w-40 h-40 text-primary -rotate-6" />
+        <UseeIcon className="absolute top-[3%] right-[40%] w-20 h-20 text-primary rotate-6" />
       </div>
 
       {/* Header */}
       <header className="relative z-10 px-4 py-6">
-        <div className="container mx-auto flex max-w-4xl justify-center">
-          <div className="flex items-center justify-center gap-3">
-            <button
-              type="button"
-              onClick={handleGoToInitialMenu}
-              aria-label="Voltar ao menu inicial"
-              className="flex items-center justify-center gap-3 rounded-lg px-1 py-1 transition-opacity hover:opacity-90"
-            >
-              <img src="/images/usee-logo.jpg" alt="Usee Brasil" className="h-10 w-10 rounded-xl" />
-              <span className="text-xl font-bold gradient-text">Usee Brasil</span>
-            </button>
+        <div className="container mx-auto grid max-w-4xl grid-cols-[1fr_auto_1fr] items-center gap-3">
+          <div />
 
+          <div className="flex items-center justify-center gap-3">
+            <img src="/images/usee-logo.jpg" alt="Usee Brasil" className="h-10 w-10 rounded-xl" />
+            <span className="text-xl font-bold gradient-text">Usee Brasil</span>
+          </div>
+
+          <div className="flex justify-end">
             {!isAdminMode ? (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setAdminDialogOpen(true)}
-                className="ml-3 rounded-xl border-glass-border bg-secondary/50 text-foreground"
+                className="rounded-xl border-glass-border bg-secondary/50 text-foreground"
               >
                 Entrar
               </Button>
