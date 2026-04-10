@@ -19,6 +19,9 @@ interface DimensionMeta {
   description: string;
   strengths: string[];
   attentionPoints: string[];
+  drivers: string[];
+  organizationalValue: string[];
+  developmentDiagnosis: string[];
 }
 
 const BASE_PROFILE_COLOR = "hsl(210 100% 64%)";
@@ -32,24 +35,84 @@ const dimensionInfo: Record<DiscKey, DimensionMeta> = {
     description: "Direto, decidido, competitivo e focado em resultados.",
     strengths: ["Decisão rápida em cenários de pressão", "Foco em metas e senso de urgência", "Capacidade de assumir liderança"],
     attentionPoints: ["Pode soar impaciente com ritmos mais lentos", "Risco de pular etapas de alinhamento", "Precisa equilibrar firmeza com escuta"],
+    drivers: [
+      "Desafios com metas claras e mensuráveis",
+      "Autonomia para decidir e remover obstáculos",
+      "Ambientes com ritmo acelerado e foco em resultado",
+    ],
+    organizationalValue: [
+      "Acelera decisões em cenários de ambiguidade",
+      "Eleva o senso de urgência e foco em execução",
+      "Assume responsabilidade por entregas críticas",
+    ],
+    developmentDiagnosis: [
+      "Praticar escuta ativa antes de definir o plano final",
+      "Expandir alinhamentos com áreas impactadas pelas decisões",
+      "Equilibrar velocidade com sustentabilidade de execução",
+    ],
   },
   I: {
     name: "Influência",
     description: "Comunicativo, entusiasta, otimista e sociável.",
     strengths: ["Facilidade para engajar pessoas", "Comunicação persuasiva e positiva", "Energia para mobilizar o time"],
     attentionPoints: ["Pode dispersar em excesso de estímulos", "Risco de subestimar detalhes técnicos", "Precisa reforçar constância na execução"],
+    drivers: [
+      "Interação frequente com pessoas e áreas diferentes",
+      "Espaço para comunicação, influência e criatividade",
+      "Reconhecimento por contribuição e mobilização do time",
+    ],
+    organizationalValue: [
+      "Aumenta engajamento e adesão às iniciativas",
+      "Conecta áreas e reduz ruídos de comunicação",
+      "Impulsiona clima positivo em momentos de pressão",
+    ],
+    developmentDiagnosis: [
+      "Fortalecer disciplina de follow-up e fechamento",
+      "Aprofundar análise de riscos e detalhes técnicos",
+      "Transformar entusiasmo em planos com marcos objetivos",
+    ],
   },
   S: {
     name: "Estabilidade",
     description: "Paciente, leal, estável e bom ouvinte.",
     strengths: ["Confiabilidade e consistência no dia a dia", "Escuta ativa e colaboração genuína", "Boa sustentação de processos"],
     attentionPoints: ["Pode evitar conflitos necessários", "Risco de adiar decisões difíceis", "Precisa exercitar adaptação em mudanças rápidas"],
+    drivers: [
+      "Ambientes colaborativos com relações de confiança",
+      "Rotinas estáveis com mudanças planejadas",
+      "Propósito claro e impacto positivo no time",
+    ],
+    organizationalValue: [
+      "Garante consistência e previsibilidade operacional",
+      "Sustenta colaboração e segurança psicológica",
+      "Preserva qualidade de relacionamento com clientes internos",
+    ],
+    developmentDiagnosis: [
+      "Treinar assertividade em conversas difíceis",
+      "Aumentar velocidade de decisão em contextos urgentes",
+      "Reforçar flexibilidade diante de mudanças rápidas",
+    ],
   },
   C: {
     name: "Conformidade",
     description: "Analítico, preciso, cuidadoso e detalhista.",
     strengths: ["Alto padrão de qualidade e precisão", "Pensamento analítico para resolver problemas", "Critério técnico na tomada de decisão"],
     attentionPoints: ["Pode travar com excesso de análise", "Risco de perfeccionismo em prazos curtos", "Precisa equilibrar criticidade com agilidade"],
+    drivers: [
+      "Critérios claros de qualidade, método e precisão",
+      "Tempo para análise de dados e validação técnica",
+      "Processos estruturados com papéis definidos",
+    ],
+    organizationalValue: [
+      "Reduz retrabalho e eleva confiabilidade das entregas",
+      "Apoia decisões robustas com base em evidências",
+      "Fortalece governança, padrões e conformidade",
+    ],
+    developmentDiagnosis: [
+      "Evitar excesso de análise em prazos curtos",
+      "Comunicar recomendações com objetividade e simplicidade",
+      "Combinar rigor técnico com pragmatismo na execução",
+    ],
   },
 };
 
@@ -109,6 +172,7 @@ const pairInsights: Partial<Record<`${DiscKey}-${DiscKey}`, { synergy: string; a
 
 const clampValue = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 const scoreOpacity = (score: number, min = 0.32, max = 1) => min + (score / 100) * (max - min);
+const mergeUnique = (...groups: string[][]) => Array.from(new Set(groups.flat()));
 
 const DISCResults = ({ scores, userInfo, onReset, resetButtonLabel = "Refazer" }: DISCResultsProps) => {
   const sorted = (Object.entries(scores) as [DiscKey, number][]).sort((a, b) => b[1] - a[1]);
@@ -143,11 +207,32 @@ const DISCResults = ({ scores, userInfo, onReset, resetButtonLabel = "Refazer" }
 
   const dominantProfile = dimensionInfo[dominantKey];
   const secondaryProfile = dimensionInfo[secondaryKey];
+  const lowestKey = sorted[sorted.length - 1][0];
+  const lowestProfile = dimensionInfo[lowestKey];
   const pairKey = `${dominantKey}-${secondaryKey}` as const;
   const pairInsight = pairInsights[pairKey] ?? {
     synergy: `A combinação entre ${dominantProfile.name} e ${secondaryProfile.name} reforça repertório comportamental complementar para diferentes contextos.`,
     attention: `O principal cuidado é equilibrar as preferências de ${dominantProfile.name} com as exigências de ${secondaryProfile.name} em momentos de pressão.`,
   };
+
+  const behavioralDrivers = mergeUnique(dominantProfile.drivers, secondaryProfile.drivers).slice(0, 6);
+  const organizationalValue = mergeUnique(dominantProfile.organizationalValue, secondaryProfile.organizationalValue).slice(0, 6);
+  const developmentSummary =
+    spread <= 15
+      ? `Perfil equilibrado entre fatores, com predominância em ${dominantProfile.name} (${scores[dominantKey]}%) e apoio de ${secondaryProfile.name} (${scores[secondaryKey]}%).`
+      : spread <= 25
+        ? `Perfil com dominância moderada em ${dominantProfile.name} (${scores[dominantKey]}%), reforçado por ${secondaryProfile.name} (${scores[secondaryKey]}%).`
+        : `Perfil com dominância acentuada em ${dominantProfile.name} (${scores[dominantKey]}%), com apoio de ${secondaryProfile.name} (${scores[secondaryKey]}%).`;
+  const developmentDiagnosis = mergeUnique(
+    dominantProfile.developmentDiagnosis,
+    secondaryProfile.developmentDiagnosis,
+    [
+      `Observar o fator menos natural (${lowestProfile.name} - ${scores[lowestKey]}%) para reduzir pontos cegos em decisões sob pressão.`,
+      spread > 25
+        ? "Criar rituais de contrapeso comportamental para ampliar flexibilidade fora da zona de conforto."
+        : "Manter rituais de priorização para preservar equilíbrio entre velocidade, relacionamento e qualidade.",
+    ],
+  ).slice(0, 7);
 
   const handleDownloadPDF = async () => {
     toast.info("Gerando relatório...");
@@ -185,17 +270,37 @@ const DISCResults = ({ scores, userInfo, onReset, resetButtonLabel = "Refazer" }
         cursorY += 4;
       };
 
+      const drawSingleColumnSection = (title: string, rows: string[]) => {
+        ensurePageSpace(34);
+        drawSectionTitle(title);
+        autoTable(doc, {
+          startY: cursorY,
+          body: rows.map((item) => [item]),
+          theme: "grid",
+          showHead: "never",
+          styles: { fontSize: 8.8, cellPadding: 2, overflow: "linebreak" },
+          columnStyles: { 0: { cellWidth: 180 } },
+        });
+        cursorY = ((doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? cursorY) + 7;
+      };
+
+      const drawPageChrome = (pageNumber: number, totalPages: number) => {
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.setTextColor(90, 98, 110);
+        doc.text("RH Usee Brasil", 14, 8);
+        doc.text(reportDate, pageWidth - 14, 8, { align: "right" });
+        doc.text(`Página ${pageNumber} de ${totalPages}`, pageWidth - 14, pageHeight - 7, { align: "right" });
+      };
+
       doc.setFont("helvetica", "bold");
       doc.setTextColor(22, 28, 36);
       doc.setFontSize(18);
-      doc.text("Relatório Avaliação DISC", 14, cursorY);
-
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(90, 98, 110);
-      doc.setFontSize(10);
-      doc.text("RH Usee Brasil", 14, cursorY + 6);
-      doc.text(`Data de geração: ${reportDate}`, 14, cursorY + 11);
-      cursorY += 18;
+      doc.text("Avaliação DISC", 14, cursorY);
+      cursorY += 12;
 
       drawSectionTitle("Resumo do Participante");
       autoTable(doc, {
@@ -271,6 +376,17 @@ const DISCResults = ({ scores, userInfo, onReset, resetButtonLabel = "Refazer" }
         styles: { fontSize: 8.8, cellPadding: 2, overflow: "linebreak" },
         columnStyles: { 0: { cellWidth: 58, fontStyle: "bold" }, 1: { cellWidth: 122 } },
       });
+      cursorY = ((doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? cursorY) + 7;
+
+      drawSingleColumnSection("Drivers Comportamentais", behavioralDrivers);
+      drawSingleColumnSection("Valor para a Organização", organizationalValue);
+      drawSingleColumnSection("Diagnóstico de Desenvolvimento", [developmentSummary, ...developmentDiagnosis]);
+
+      const totalPages = doc.getNumberOfPages();
+      for (let pageNumber = 1; pageNumber <= totalPages; pageNumber++) {
+        doc.setPage(pageNumber);
+        drawPageChrome(pageNumber, totalPages);
+      }
 
       doc.save(`DISC ${userInfo.nome} ${userInfo.sobrenome}.pdf`);
       toast.success("Relatório gerado com sucesso!");
@@ -540,6 +656,42 @@ const DISCResults = ({ scores, userInfo, onReset, resetButtonLabel = "Refazer" }
             <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
               Atenção nessa combinação: {pairInsight.attention}
             </p>
+          </div>
+
+          <div className="mt-4 grid gap-4 lg:grid-cols-3">
+            <div className="rounded-xl border border-glass-border/70 bg-secondary/25 p-4">
+              <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-foreground">Drivers Comportamentais</h4>
+              <ul className="space-y-1.5 text-xs text-foreground/90">
+                {behavioralDrivers.map((item) => (
+                  <li key={item} className="leading-relaxed">
+                    • {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="rounded-xl border border-glass-border/70 bg-secondary/25 p-4">
+              <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-foreground">Valor para a Organização</h4>
+              <ul className="space-y-1.5 text-xs text-foreground/90">
+                {organizationalValue.map((item) => (
+                  <li key={item} className="leading-relaxed">
+                    • {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="rounded-xl border border-glass-border/70 bg-secondary/25 p-4">
+              <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-foreground">Diagnóstico de Desenvolvimento</h4>
+              <p className="mb-2 text-xs leading-relaxed text-foreground/90">{developmentSummary}</p>
+              <ul className="space-y-1.5 text-xs text-muted-foreground">
+                {developmentDiagnosis.map((item) => (
+                  <li key={item} className="leading-relaxed">
+                    • {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </div>
