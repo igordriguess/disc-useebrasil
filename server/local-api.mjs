@@ -115,6 +115,9 @@ const server = createServer(async (request, response) => {
     return;
   }
 
+  // ✅ PRIMEIRO DEFINE URL
+  const url = new URL(request.url, `http://${request.headers.host || "localhost"}`);
+
   if (request.method === "OPTIONS") {
     response.writeHead(204, {
       "Access-Control-Allow-Origin": "*",
@@ -125,18 +128,10 @@ const server = createServer(async (request, response) => {
     return;
   }
 
-  // ✅ DEFINE URL ANTES DE USAR
-  const url = new URL(request.url, `http://${request.headers.host || "localhost"}`);
-
   try {
     // =========================
-    // 🚀 ROTAS API
+    // 🚀 API PRIMEIRO
     // =========================
-
-    if (request.method === "GET" && url.pathname === "/api/storage-location") {
-      sendJson(response, 200, { directory: SUBMISSIONS_DIR });
-      return;
-    }
 
     if (request.method === "GET" && url.pathname === "/api/submissions") {
       const entries = await getSubmissions();
