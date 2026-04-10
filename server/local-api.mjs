@@ -203,28 +203,51 @@ const server = createServer(async (request, response) => {
     // 🌐 FRONTEND (VITE BUILD)
     // =========================
 
-    if (request.method === "GET") {
-      let filePath = path.join(process.cwd(), "dist", url.pathname);
+    const distPath = path.resolve("dist");
 
-      // raiz → index.html
+    if (request.method === "GET") {
+
+      let filePath = path.join(distPath, url.pathname);
+
       if (url.pathname === "/") {
-        filePath = path.join(process.cwd(), "dist", "index.html");
+        filePath = path.join(distPath, "index.html");
       }
+
+      const ext = path.extname(filePath);
+
+      const contentTypes = {
+        ".html": "text/html",
+        ".js": "application/javascript",
+        ".css": "text/css",
+        ".json": "application/json",
+        ".png": "image/png",
+        ".jpg": "image/jpeg",
+        ".svg": "image/svg+xml",
+        ".ico": "image/x-icon"
+      };
+
+      const contentType = contentTypes[ext] || "application/octet-stream";
 
       const stream = createReadStream(filePath);
 
+      stream.on("open", () => {
+        response.writeHead(200, { "Content-Type": contentType });
+      });
+
       stream.on("error", () => {
-        // 🔥 NÃO fazer fallback para arquivos de assets
+
         if (!url.pathname.startsWith("/assets")) {
           const fallback = createReadStream(
-            path.join(process.cwd(), "dist", "index.html")
+            path.join(distPath, "index.html")
           );
+
+          response.writeHead(200, { "Content-Type": "text/html" });
           fallback.pipe(response);
         } else {
-          // assets inexistentes → 404 correto
           response.writeHead(404);
           response.end();
         }
+
       });
 
       stream.pipe(response);
