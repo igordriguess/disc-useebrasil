@@ -136,11 +136,11 @@ const AdminDashboard = ({ onExit }: AdminDashboardProps) => {
       <>
         <section className="py-8 md:py-10">
           <div className="container mx-auto max-w-4xl space-y-4 px-4">
-            <div className="glass flex flex-wrap items-center justify-between gap-3 p-4">
+            <div className="glass flex flex-col gap-2 p-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3">
               <Button
                 variant="outline"
                 onClick={() => setSelectedId(null)}
-                className="rounded-xl border-glass-border bg-secondary/50 text-foreground"
+                className="w-full rounded-xl border-glass-border bg-secondary/50 text-foreground sm:w-auto"
               >
                 <ArrowLeft size={16} className="mr-1" /> Voltar para lista
               </Button>
@@ -148,7 +148,7 @@ const AdminDashboard = ({ onExit }: AdminDashboardProps) => {
               <Button
                 variant="destructive"
                 onClick={() => requestDelete(selectedEntry)}
-                className="rounded-xl"
+                className="w-full rounded-xl sm:w-auto"
                 disabled={deletingId === selectedEntry.id}
               >
                 <Trash2 size={16} className="mr-1" /> Excluir avaliação
@@ -169,25 +169,25 @@ const AdminDashboard = ({ onExit }: AdminDashboardProps) => {
   }
 
   return (
-    <section className="py-10 md:py-16">
+    <section className="py-8 md:py-16">
       <div className="container mx-auto max-w-4xl space-y-4 px-4">
-        <div className="glass p-5 md:p-6">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="glass p-4 md:p-6">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
             <div>
               <h2 className="text-xl font-bold md:text-2xl">Painel do Administrador</h2>
               <p className="text-xs text-muted-foreground">Gerencie as avaliações DISC preenchidas.</p>
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
               <Button
                 variant="outline"
                 onClick={() => void refreshEntries()}
-                className="rounded-xl border-glass-border bg-secondary/50 text-foreground"
+                className="w-full rounded-xl border-glass-border bg-secondary/50 text-foreground sm:w-auto"
                 disabled={isLoading}
               >
                 <RefreshCcw size={16} className="mr-1" /> Atualizar
               </Button>
-              <Button variant="outline" onClick={onExit} className="rounded-xl border-glass-border bg-secondary/50 text-foreground">
+              <Button variant="outline" onClick={onExit} className="w-full rounded-xl border-glass-border bg-secondary/50 text-foreground sm:w-auto">
                 <LogOut size={16} className="mr-1" /> Sair
               </Button>
             </div>
@@ -225,11 +225,11 @@ const AdminDashboard = ({ onExit }: AdminDashboardProps) => {
                       </p>
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
                       <Button
                         variant="outline"
                         onClick={() => setSelectedId(entry.id)}
-                        className="rounded-xl border-glass-border bg-secondary/50 text-foreground"
+                        className="w-full rounded-xl border-glass-border bg-secondary/50 text-foreground sm:w-auto"
                         disabled={!!deletingId}
                       >
                         <Eye size={16} className="mr-1" /> Visualizar
@@ -240,7 +240,7 @@ const AdminDashboard = ({ onExit }: AdminDashboardProps) => {
                           event.stopPropagation();
                           requestDelete(entry);
                         }}
-                        className="rounded-xl"
+                        className="w-full rounded-xl sm:w-auto"
                         disabled={deletingId === entry.id}
                       >
                         <Trash2 size={16} className="mr-1" /> Excluir

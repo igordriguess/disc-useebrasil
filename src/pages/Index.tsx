@@ -142,6 +142,8 @@ const Index = () => {
     handleReset();
   };
 
+  const showBottomAdminEntry = !isAdminMode && !adminDialogOpen;
+
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-background">
       {/* Background - logo-inspired smiley icons */}
@@ -155,7 +157,7 @@ const Index = () => {
       </div>
 
       {/* Header */}
-      <header className="relative z-10 px-4 py-6">
+      <header className="relative z-10 px-4 py-5 md:py-6">
         <div className="container mx-auto flex max-w-4xl justify-center">
           <div className="flex items-center justify-center gap-3">
             <button
@@ -173,7 +175,7 @@ const Index = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => setAdminDialogOpen(true)}
-                className="ml-3 rounded-xl border-glass-border bg-secondary/50 text-foreground"
+                className="ml-3 hidden rounded-xl border-glass-border bg-secondary/50 text-foreground md:inline-flex"
               >
                 Entrar
               </Button>
@@ -183,7 +185,7 @@ const Index = () => {
       </header>
 
       {/* Content */}
-      <main className="relative z-10 flex-1">
+      <main className={`relative z-10 flex-1 ${!isAdminMode ? "pb-24 md:pb-0" : ""}`}>
         {isAdminMode ? (
           <AdminDashboard onExit={handleExitAdmin} />
         ) : scores && userInfo ? (
@@ -214,13 +216,13 @@ const Index = () => {
           }
         }}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="left-1/2 w-[calc(100%-1rem)] max-h-[88dvh] max-w-md -translate-x-1/2 overflow-y-auto rounded-2xl border-glass-border bg-card/95 p-4 sm:max-h-[90dvh] sm:p-6 max-sm:bottom-2 max-sm:left-2 max-sm:right-2 max-sm:top-auto max-sm:w-auto max-sm:translate-x-0 max-sm:translate-y-0">
           <DialogHeader>
             <DialogTitle>Acesso Administrador</DialogTitle>
             <DialogDescription>Acesso exclusivo do RH Usee Brasil.</DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="admin-username">Usuário</Label>
               <Input
@@ -229,6 +231,7 @@ const Index = () => {
                 onChange={(event) => setAdminUsername(event.target.value)}
                 placeholder="Digite o usuário"
                 autoComplete="username"
+                className="h-11 rounded-xl text-base"
               />
             </div>
 
@@ -241,6 +244,7 @@ const Index = () => {
                 onChange={(event) => setAdminPassword(event.target.value)}
                 placeholder="Digite a senha"
                 autoComplete="current-password"
+                className="h-11 rounded-xl text-base"
                 onKeyDown={(event) => {
                   if (event.key === "Enter") {
                     void handleAdminLogin();
@@ -250,18 +254,35 @@ const Index = () => {
             </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAdminDialogOpen(false)} disabled={isAuthenticating}>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setAdminDialogOpen(false)} disabled={isAuthenticating} className="h-11 w-full rounded-xl sm:w-auto">
               Cancelar
             </Button>
-            <Button onClick={() => void handleAdminLogin()} disabled={isAuthenticating || !adminUsername.trim() || !adminPassword}>
+            <Button
+              onClick={() => void handleAdminLogin()}
+              disabled={isAuthenticating || !adminUsername.trim() || !adminPassword}
+              className="h-11 w-full rounded-xl sm:w-auto"
+            >
               {isAuthenticating ? "Validando..." : "Entrar"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <footer className="relative z-10 px-4 pb-6 pt-2 text-center text-xs text-muted-foreground">
+      {showBottomAdminEntry ? (
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-glass-border/80 bg-background/95 backdrop-blur md:hidden">
+          <div className="mx-auto flex max-w-4xl px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3">
+            <Button
+              onClick={() => setAdminDialogOpen(true)}
+              className="gradient-primary h-11 w-full rounded-xl text-primary-foreground"
+            >
+              Entrar
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
+      <footer className="relative z-10 px-4 pb-24 pt-2 text-center text-xs text-muted-foreground md:pb-6">
         <p>© 2026 Usee Brasil. Todos os direitos reservados.</p>
         <p className="mt-1">Desenvolvido com 💙 para os colaboradores da Usee Brasil</p>
       </footer>

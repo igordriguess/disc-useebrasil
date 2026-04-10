@@ -48,8 +48,8 @@ const UserInfoForm = ({ onSubmit, isSubmitting = false, errorMessage = "" }: Use
   const isValid = info.nome.trim() && info.sobrenome.trim() && info.idade.trim() && info.setor;
 
   return (
-    <section className="py-10 md:py-16">
-      <div className="container mx-auto px-4 max-w-md">
+    <section className="py-8 md:py-16">
+      <div className="container mx-auto max-w-md px-4">
         <div className="text-center mb-8 space-y-2">
           <h2 className="text-xl md:text-2xl font-bold">
             Seus <span className="gradient-text">Dados</span>
@@ -59,14 +59,14 @@ const UserInfoForm = ({ onSubmit, isSubmitting = false, errorMessage = "" }: Use
           </p>
         </div>
 
-        <div className="glass p-5 md:p-7 space-y-4">
+        <div className="glass space-y-4 p-4 md:p-7">
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-foreground">Nome</label>
             <Input
               value={info.nome}
               onChange={(e) => setInfo({ ...info, nome: e.target.value })}
               placeholder="Seu nome"
-              className="rounded-xl border-glass-border bg-secondary/50 text-foreground placeholder:text-muted-foreground"
+              className="h-11 rounded-xl border-glass-border bg-secondary/50 text-base text-foreground placeholder:text-muted-foreground md:text-sm"
             />
           </div>
           <div className="space-y-1.5">
@@ -75,7 +75,7 @@ const UserInfoForm = ({ onSubmit, isSubmitting = false, errorMessage = "" }: Use
               value={info.sobrenome}
               onChange={(e) => setInfo({ ...info, sobrenome: e.target.value })}
               placeholder="Seu sobrenome"
-              className="rounded-xl border-glass-border bg-secondary/50 text-foreground placeholder:text-muted-foreground"
+              className="h-11 rounded-xl border-glass-border bg-secondary/50 text-base text-foreground placeholder:text-muted-foreground md:text-sm"
             />
           </div>
           <div className="space-y-1.5">
@@ -88,7 +88,7 @@ const UserInfoForm = ({ onSubmit, isSubmitting = false, errorMessage = "" }: Use
                 value={info.idade}
                 onChange={(e) => updateAge(e.target.value)}
                 placeholder="Sua idade"
-                className="rounded-xl border-glass-border bg-secondary/50 pr-14 text-foreground placeholder:text-muted-foreground [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                className="h-11 rounded-xl border-glass-border bg-secondary/50 pr-14 text-base text-foreground placeholder:text-muted-foreground [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none md:text-sm"
               />
               <div className="absolute inset-y-1 right-1 flex w-12 gap-1">
                 <button
@@ -112,12 +112,12 @@ const UserInfoForm = ({ onSubmit, isSubmitting = false, errorMessage = "" }: Use
           </div>
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-foreground">Setor</label>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
               {SETORES.map((s) => (
                 <button
                   key={s}
                   onClick={() => setInfo({ ...info, setor: s })}
-                  className={`px-3 py-2 rounded-xl text-xs font-medium transition-all ${
+                  className={`rounded-xl px-3 py-2 text-sm font-medium transition-all sm:w-auto sm:text-xs ${
                     info.setor === s
                       ? "gradient-primary text-primary-foreground shadow-lg shadow-primary/20"
                       : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
@@ -135,11 +135,11 @@ const UserInfoForm = ({ onSubmit, isSubmitting = false, errorMessage = "" }: Use
             </div>
           ) : null}
 
-          <div className="pt-3 flex justify-end">
+          <div className="flex justify-center pt-3">
             <Button
               onClick={() => void onSubmit(info)}
               disabled={!isValid || isSubmitting}
-              className="gradient-primary text-primary-foreground rounded-xl hover:opacity-90 transition-opacity"
+              className="gradient-primary w-full rounded-xl text-primary-foreground transition-opacity hover:opacity-90 sm:w-auto"
             >
               {isSubmitting ? "Validando..." : "Iniciar Avaliação"} <ChevronRight size={16} className="ml-1" />
             </Button>

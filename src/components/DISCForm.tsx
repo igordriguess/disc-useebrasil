@@ -56,8 +56,8 @@ const DISCForm = ({ onComplete, onBackToUserInfo, isSubmitting = false }: DISCFo
   };
 
   return (
-    <section className="py-10 md:py-16">
-      <div className="container mx-auto px-4 max-w-2xl">
+    <section className="py-8 md:py-16">
+      <div className="container mx-auto max-w-2xl px-4">
         <div className="text-center mb-8 space-y-2">
           <h2 className="text-xl md:text-2xl font-bold">
             Avaliação <span className="gradient-text">DISC</span>
@@ -70,7 +70,7 @@ const DISCForm = ({ onComplete, onBackToUserInfo, isSubmitting = false }: DISCFo
           </p>
         </div>
 
-        <div className="glass p-5 md:p-7 space-y-5">
+        <div className="glass space-y-5 p-4 md:p-7">
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>Progresso</span>
@@ -86,7 +86,7 @@ const DISCForm = ({ onComplete, onBackToUserInfo, isSubmitting = false }: DISCFo
                   <span className="text-primary mr-2">{q.id}.</span>
                   {q.text}
                 </p>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
                   {scaleLabels.map((label, idx) => {
                     const value = idx + 1;
                     const selected = answers[q.id] === value;
@@ -94,7 +94,7 @@ const DISCForm = ({ onComplete, onBackToUserInfo, isSubmitting = false }: DISCFo
                       <button
                         key={value}
                         onClick={() => setAnswer(q.id, value)}
-                        className={`px-3 py-2 rounded-xl text-xs font-medium transition-all ${
+                        className={`rounded-xl px-3 py-2 text-sm font-medium transition-all sm:w-auto sm:text-xs ${
                           selected
                             ? "gradient-primary text-primary-foreground shadow-lg shadow-primary/20"
                             : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
@@ -109,12 +109,12 @@ const DISCForm = ({ onComplete, onBackToUserInfo, isSubmitting = false }: DISCFo
             ))}
           </div>
 
-          <div className="flex justify-between items-center pt-3">
+          <div className="flex flex-col-reverse gap-2 pt-3 sm:flex-row sm:items-center sm:justify-between">
             {page === 0 ? (
               <Button
                 variant="outline"
                 onClick={onBackToUserInfo}
-                className="rounded-xl border-glass-border bg-secondary/50 text-foreground"
+                className="w-full rounded-xl border-glass-border bg-secondary/50 text-foreground sm:w-auto"
               >
                 <ChevronLeft size={16} className="mr-1" /> Voltar
               </Button>
@@ -122,7 +122,7 @@ const DISCForm = ({ onComplete, onBackToUserInfo, isSubmitting = false }: DISCFo
               <Button
                 variant="outline"
                 onClick={() => setPage((p) => p - 1)}
-                className="rounded-xl border-glass-border bg-secondary/50 text-foreground"
+                className="w-full rounded-xl border-glass-border bg-secondary/50 text-foreground sm:w-auto"
               >
                 <ChevronLeft size={16} className="mr-1" /> Anterior
               </Button>
@@ -132,7 +132,7 @@ const DISCForm = ({ onComplete, onBackToUserInfo, isSubmitting = false }: DISCFo
               <Button
                 onClick={() => setPage((p) => p + 1)}
                 disabled={!allCurrentAnswered}
-                className="gradient-primary text-primary-foreground rounded-xl hover:opacity-90 transition-opacity"
+                className="gradient-primary w-full rounded-xl text-primary-foreground transition-opacity hover:opacity-90 sm:w-auto"
               >
                 Próximo <ChevronRight size={16} className="ml-1" />
               </Button>
@@ -140,7 +140,7 @@ const DISCForm = ({ onComplete, onBackToUserInfo, isSubmitting = false }: DISCFo
               <Button
                 onClick={() => void onComplete(calculateScores())}
                 disabled={!allAnswered || isSubmitting}
-                className="gradient-primary text-primary-foreground rounded-xl hover:opacity-90 transition-opacity"
+                className="gradient-primary w-full rounded-xl text-primary-foreground transition-opacity hover:opacity-90 sm:w-auto"
               >
                 <CheckCircle2 size={16} className="mr-1" /> {isSubmitting ? "Salvando..." : "Finalizar"}
               </Button>

@@ -280,7 +280,7 @@ const DISCResults = ({ scores, userInfo, onReset, resetButtonLabel = "Refazer" }
   };
 
   return (
-    <section className="pb-10 pt-2 md:pb-16 md:pt-4">
+    <section className="pb-10 pt-1 md:pb-16 md:pt-4">
       <div className="container mx-auto max-w-4xl space-y-6 px-4">
         <div className="space-y-3 text-center animate-fade-in">
           <h2 className="text-2xl font-bold md:text-3xl">
@@ -305,11 +305,11 @@ const DISCResults = ({ scores, userInfo, onReset, resetButtonLabel = "Refazer" }
           </div>
         </div>
 
-        <div className="glass p-6 md:p-7 animate-scale-in">
+        <div className="glass animate-scale-in p-4 md:p-7">
           <h3 className="mb-1 text-center text-sm font-semibold text-foreground">Quadrante</h3>
 
           <div className="relative mx-auto max-w-3xl">
-            <div className="relative grid h-[260px] grid-cols-2 grid-rows-2 overflow-hidden rounded-2xl border border-glass-border bg-secondary/25 md:h-[320px]">
+            <div className="relative grid h-[240px] grid-cols-2 grid-rows-2 overflow-hidden rounded-2xl border border-glass-border bg-secondary/25 md:h-[320px]">
               {quadrantLayout.map((key) => {
                 const meta = dimensionInfo[key];
                 const value = scores[key];
@@ -318,16 +318,16 @@ const DISCResults = ({ scores, userInfo, onReset, resetButtonLabel = "Refazer" }
                 return (
                   <div
                     key={key}
-                    className="flex flex-col justify-between border border-glass-border/70 p-4 backdrop-blur-[1px] transition-all duration-500"
+                    className="flex flex-col justify-between border border-glass-border/70 p-2.5 backdrop-blur-[1px] transition-all duration-500 md:p-4"
                     style={{
                       opacity: scoreOpacity(value, 0.36, 0.86),
                       background: `linear-gradient(145deg, hsl(${palette.tone} / ${0.12 + value / 460}), hsl(${palette.tone} / ${0.3 + value / 240}))`,
                     }}
                   >
-                    <span className="text-xs font-semibold tracking-wide text-foreground/90">{key}</span>
+                    <span className="text-[11px] font-semibold tracking-wide text-foreground/90 md:text-xs">{key}</span>
                     <div>
-                      <p className="text-sm font-medium text-foreground">{meta.name}</p>
-                      <p className="text-xl font-bold" style={{ color: palette.color }}>
+                      <p className="text-xs font-medium text-foreground md:text-sm">{meta.name}</p>
+                      <p className="text-lg font-bold md:text-xl" style={{ color: palette.color }}>
                         {value}%
                       </p>
                     </div>
@@ -361,7 +361,7 @@ const DISCResults = ({ scores, userInfo, onReset, resetButtonLabel = "Refazer" }
         </div>
 
         <div className="space-y-6">
-          <div className="glass p-6 md:p-7 animate-fade-in" style={{ animationDelay: "0.05s" }}>
+          <div className="glass animate-fade-in p-4 md:p-7" style={{ animationDelay: "0.05s" }}>
             <h3 className="mb-1 text-center text-sm font-semibold text-foreground">Distribuição</h3>
 
             <div className="space-y-3">
@@ -403,10 +403,10 @@ const DISCResults = ({ scores, userInfo, onReset, resetButtonLabel = "Refazer" }
             </div>
           </div>
 
-          <div className="glass p-6 md:p-7 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+          <div className="glass animate-fade-in p-4 md:p-7" style={{ animationDelay: "0.1s" }}>
             <h3 className="mb-1 text-center text-sm font-semibold text-foreground">Radar</h3>
 
-            <div className="h-[300px] rounded-xl border border-glass-border/60 bg-secondary/15 p-2 md:h-[320px]">
+            <div className="h-[270px] rounded-xl border border-glass-border/60 bg-secondary/15 p-2 md:h-[320px]">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData} outerRadius="76%" cy="50%">
                   <PolarGrid stroke="hsl(220 18% 24%)" />
@@ -468,7 +468,7 @@ const DISCResults = ({ scores, userInfo, onReset, resetButtonLabel = "Refazer" }
           </div>
         </div>
 
-        <div className="glass p-5 md:p-6 animate-fade-in" style={{ animationDelay: "0.15s" }}>
+        <div className="glass animate-fade-in p-4 md:p-6" style={{ animationDelay: "0.15s" }}>
           <div className="mb-4 text-center">
             <p className="text-sm leading-relaxed text-foreground/95">
               Perfil predominante:{" "}
@@ -545,11 +545,11 @@ const DISCResults = ({ scores, userInfo, onReset, resetButtonLabel = "Refazer" }
       </div>
 
       <div className="container mx-auto mt-6 max-w-4xl px-4">
-        <div className="flex flex-wrap justify-center gap-3">
-          <Button onClick={handleDownloadPDF} variant="outline" className="rounded-xl border-glass-border bg-secondary/50 text-foreground">
+        <div className="flex flex-col justify-center gap-2 sm:flex-row sm:gap-3">
+          <Button onClick={handleDownloadPDF} variant="outline" className="w-full rounded-xl border-glass-border bg-secondary/50 text-foreground sm:w-auto">
             <Download size={16} className="mr-2" /> Baixar PDF
           </Button>
-          <Button onClick={onReset} variant="outline" className="rounded-xl border-glass-border bg-secondary/50 text-foreground">
+          <Button onClick={onReset} variant="outline" className="w-full rounded-xl border-glass-border bg-secondary/50 text-foreground sm:w-auto">
             <RotateCcw size={16} className="mr-2" /> {resetButtonLabel}
           </Button>
         </div>
