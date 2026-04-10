@@ -61,17 +61,11 @@ const readBody = async (request) =>
 
     request.on("data", (chunk) => {
       data += chunk;
-      if (data.length > 1024 * 1024) {
-        reject(new Error("Body too large"));
-      }
+      if (data.length > 1024 * 1024) reject(new Error("Body too large"));
     });
 
     request.on("end", () => {
-      if (!data) {
-        resolve({});
-        return;
-      }
-
+      if (!data) return resolve({});
       try {
         resolve(JSON.parse(data));
       } catch {
@@ -89,7 +83,7 @@ const ensureStorage = async () => {
 const getSubmissionFiles = async () => {
   await ensureStorage();
   const items = await readdir(SUBMISSIONS_DIR, { withFileTypes: true });
-  return items.filter((item) => item.isFile() && item.name.endsWith(".json")).map((item) => item.name);
+  return items.filter((i) => i.isFile() && i.name.endsWith(".json")).map((i) => i.name);
 };
 
 const getSubmissions = async () => {
@@ -100,13 +94,7 @@ const getSubmissions = async () => {
     try {
       const content = await readFile(path.join(SUBMISSIONS_DIR, fileName), "utf-8");
       const parsed = JSON.parse(content);
-      if (
-        parsed &&
-        typeof parsed.id === "string" &&
-        typeof parsed.createdAt === "string" &&
-        parsed.userInfo &&
-        parsed.scores
-      ) {
+      if (parsed?.id && parsed?.createdAt && parsed?.userInfo && parsed?.scores) {
         entries.push({
           id: parsed.id,
           fileName: parsed.fileName || fileName,
@@ -115,39 +103,13 @@ const getSubmissions = async () => {
           scores: parsed.scores,
         });
       }
-    } catch {
-      // Ignore malformed files and keep serving valid entries.
-    }
+    } catch {}
   }
 
-  return entries.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  return entries.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 };
 
-
 const server = createServer(async (request, response) => {
-  // servir arquivos estáticos do frontend
-  if (request.method === "GET") {
-    let filePath = path.join(process.cwd(), "dist", url.pathname);
-
-    if (url.pathname === "/") {
-      filePath = path.join(process.cwd(), "dist", "index.html");
-    }
-
-    try {
-      const stream = createReadStream(filePath);
-      stream.pipe(response);
-      return;
-    } catch {
-      // fallback para index.html (SPA)
-      try {
-        const indexPath = path.join(process.cwd(), "dist", "index.html");
-        const stream = createReadStream(indexPath);
-        stream.pipe(response);
-        return;
-      } catch {}
-    }
-  }
-
   if (!request.url) {
     sendJson(response, 400, { error: "Invalid request" });
     return;
@@ -163,9 +125,14 @@ const server = createServer(async (request, response) => {
     return;
   }
 
+  // ✅ DEFINE URL ANTES DE USAR
   const url = new URL(request.url, `http://${request.headers.host || "localhost"}`);
 
   try {
+    // =========================
+    // 🚀 ROTAS API
+    // =========================
+
     if (request.method === "GET" && url.pathname === "/api/storage-location") {
       sendJson(response, 200, { directory: SUBMISSIONS_DIR });
       return;
@@ -198,14 +165,15 @@ const server = createServer(async (request, response) => {
         return;
       }
 
-      const id = normalizeSubmissionKey(userInfo);
       const entries = await getSubmissions();
       if (hasDuplicateSubmission(entries, userInfo)) {
         sendJson(response, 409, { error: "duplicate" });
         return;
       }
 
+      const id = normalizeSubmissionKey(userInfo);
       const fileName = buildFileName(userInfo);
+
       const entry = {
         id,
         fileName,
@@ -215,20 +183,17 @@ const server = createServer(async (request, response) => {
       };
 
       await ensureStorage();
-      await writeFile(path.join(SUBMISSIONS_DIR, fileName), JSON.stringify(entry, null, 2), "utf-8");
+      await writeFile(path.join(SUBMISSIONS_DIR, fileName), JSON.stringify(entry, null, 2));
+
       sendJson(response, 201, { entry });
       return;
     }
 
     if (request.method === "DELETE" && url.pathname.startsWith("/api/submissions/")) {
-      const submissionId = decodeURIComponent(url.pathname.replace("/api/submissions/", "")).trim();
-      if (!submissionId) {
-        sendJson(response, 400, { error: "Invalid submission id" });
-        return;
-      }
-
+      const id = decodeURIComponent(url.pathname.replace("/api/submissions/", ""));
       const entries = await getSubmissions();
-      const target = entries.find((entry) => entry.id === submissionId);
+      const target = entries.find((e) => e.id === id);
+
       if (!target) {
         sendJson(response, 404, { error: "not-found" });
         return;
@@ -239,7 +204,30 @@ const server = createServer(async (request, response) => {
       return;
     }
 
+    // =========================
+    // 🌐 FRONTEND (VITE BUILD)
+    // =========================
+
+    if (request.method === "GET") {
+      let filePath = path.join(process.cwd(), "dist", url.pathname);
+
+      if (url.pathname === "/") {
+        filePath = path.join(process.cwd(), "dist", "index.html");
+      }
+
+      const stream = createReadStream(filePath);
+
+      stream.on("error", () => {
+        const fallback = createReadStream(path.join(process.cwd(), "dist", "index.html"));
+        fallback.pipe(response);
+      });
+
+      stream.pipe(response);
+      return;
+    }
+
     sendJson(response, 404, { error: "Route not found" });
+
   } catch (error) {
     sendJson(response, 500, { error: "Internal server error", detail: String(error) });
   }
