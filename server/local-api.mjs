@@ -206,6 +206,7 @@ const server = createServer(async (request, response) => {
     if (request.method === "GET") {
       let filePath = path.join(process.cwd(), "dist", url.pathname);
 
+      // raiz → index.html
       if (url.pathname === "/") {
         filePath = path.join(process.cwd(), "dist", "index.html");
       }
@@ -213,8 +214,17 @@ const server = createServer(async (request, response) => {
       const stream = createReadStream(filePath);
 
       stream.on("error", () => {
-        const fallback = createReadStream(path.join(process.cwd(), "dist", "index.html"));
-        fallback.pipe(response);
+        // 🔥 NÃO fazer fallback para arquivos de assets
+        if (!url.pathname.startsWith("/assets")) {
+          const fallback = createReadStream(
+            path.join(process.cwd(), "dist", "index.html")
+          );
+          fallback.pipe(response);
+        } else {
+          // assets inexistentes → 404 correto
+          response.writeHead(404);
+          response.end();
+        }
       });
 
       stream.pipe(response);
@@ -223,9 +233,9 @@ const server = createServer(async (request, response) => {
 
     sendJson(response, 404, { error: "Route not found" });
 
-  } catch (error) {
-    sendJson(response, 500, { error: "Internal server error", detail: String(error) });
-  }
+    } catch (error) {
+      sendJson(response, 500, { error: "Internal server error", detail: String(error) });
+    }
 });
 
 server.listen(PORT, async () => {
