@@ -75,6 +75,23 @@ const normalizeSegment = (value) => {
 const normalizeSubmissionKey = (userInfo) =>
   `${normalizeSegment(userInfo?.nome)}_${normalizeSegment(userInfo?.sobrenome)}_${normalizeSegment(userInfo?.idade)}_${normalizeSegment(userInfo?.setor)}`.toLowerCase();
 
+const normalizeEntryId = (entry) => String(entry?.id || "").trim().toLowerCase();
+
+const getEntryKeys = (entry) => {
+  const keys = new Set();
+  const entryId = normalizeEntryId(entry);
+
+  if (entryId) {
+    keys.add(entryId);
+  }
+
+  if (entry?.userInfo) {
+    keys.add(normalizeSubmissionKey(entry.userInfo));
+  }
+
+  return keys;
+};
+
 const toStoredUserInfo = (userInfo) => ({
   nome: String(userInfo?.nome || "").trim(),
   sobrenome: String(userInfo?.sobrenome || "").trim(),
@@ -107,8 +124,18 @@ const getSubmissions = async () => {
       const content = await readFile(path.join(SUBMISSIONS_DIR, fileName), "utf-8");
       const parsed = JSON.parse(content);
 
-      if (parsed?.id && parsed?.createdAt) {
-        entries.push(parsed);
+      if (parsed?.createdAt) {
+        const normalizedId = normalizeEntryId(parsed) || normalizeSubmissionKey(parsed?.userInfo);
+
+        if (!normalizedId) {
+          continue;
+        }
+
+        entries.push({
+          ...parsed,
+          id: normalizedId,
+          fileName: parsed?.fileName || fileName,
+        });
       }
     } catch {}
   }
@@ -153,7 +180,7 @@ const server = createServer(async (req, res) => {
 
       const entries = await getSubmissions();
       const id = normalizeSubmissionKey(userInfo);
-      const exists = entries.some((entry) => entry.id === id);
+      const exists = entries.some((entry) => getEntryKeys(entry).has(id));
 
       return sendJson(res, 200, { exists });
     }
@@ -191,20 +218,24 @@ const server = createServer(async (req, res) => {
       }
 
       const entries = await getSubmissions();
+      const entryId = normalizeSubmissionKey(parsed.userInfo);
 
-      if (entries.some(e => e.id === normalizeSubmissionKey(parsed.userInfo))) {
+      if (entries.some((entry) => getEntryKeys(entry).has(entryId))) {
         return sendJson(res, 409, { error: "duplicate" });
       }
 
+      const fileName = `${entryId}.json`;
+
       const entry = {
-        id: normalizeSubmissionKey(parsed.userInfo),
+        id: entryId,
+        fileName,
         createdAt: new Date().toISOString(),
         userInfo: toStoredUserInfo(parsed.userInfo),
         scores: parsed.scores,
       };
 
       await writeFile(
-        path.join(SUBMISSIONS_DIR, `${entry.id}.json`),
+        path.join(SUBMISSIONS_DIR, fileName),
         JSON.stringify(entry, null, 2)
       );
 
@@ -212,8 +243,34 @@ const server = createServer(async (req, res) => {
     }
 
     if (req.method === "DELETE" && url.pathname.startsWith("/api/submissions/")) {
-      const id = url.pathname.split("/").pop();
-      await rm(path.join(SUBMISSIONS_DIR, `${id}.json`)).catch(() => {});
+      const id = decodeURIComponent(url.pathname.split("/").pop() || "").toLowerCase();
+
+      if (!id) {
+        return sendJson(res, 400, { deleted: false, error: "invalid-id" });
+      }
+
+      const files = await getSubmissionFiles();
+      const entries = await getSubmissions();
+
+      let targetFileName = `${id}.json`;
+
+      if (!files.includes(targetFileName)) {
+        const matchedEntry = entries.find((entry) => getEntryKeys(entry).has(id));
+
+        if (matchedEntry?.fileName && files.includes(matchedEntry.fileName)) {
+          targetFileName = matchedEntry.fileName;
+        } else {
+          const caseInsensitiveMatch = files.find((name) => name.toLowerCase() === targetFileName);
+
+          if (!caseInsensitiveMatch) {
+            return sendJson(res, 404, { deleted: false, error: "not-found" });
+          }
+
+          targetFileName = caseInsensitiveMatch;
+        }
+      }
+
+      await rm(path.join(SUBMISSIONS_DIR, targetFileName));
       return sendJson(res, 200, { deleted: true });
     }
 
