@@ -1,8 +1,9 @@
+import { createReadStream } from "node:fs";
 import { createServer } from "node:http";
 import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-const PORT = Number(process.env.DISC_API_PORT || 3001);
+const PORT = Number(process.env.PORT || 3001);
 const DATA_DIR = path.resolve(process.cwd(), "local-disc-data");
 const SUBMISSIONS_DIR = path.join(DATA_DIR, "submissions");
 
@@ -122,7 +123,31 @@ const getSubmissions = async () => {
   return entries.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 };
 
+
 const server = createServer(async (request, response) => {
+  // servir arquivos estáticos do frontend
+  if (request.method === "GET") {
+    let filePath = path.join(process.cwd(), "dist", url.pathname);
+
+    if (url.pathname === "/") {
+      filePath = path.join(process.cwd(), "dist", "index.html");
+    }
+
+    try {
+      const stream = createReadStream(filePath);
+      stream.pipe(response);
+      return;
+    } catch {
+      // fallback para index.html (SPA)
+      try {
+        const indexPath = path.join(process.cwd(), "dist", "index.html");
+        const stream = createReadStream(indexPath);
+        stream.pipe(response);
+        return;
+      } catch {}
+    }
+  }
+
   if (!request.url) {
     sendJson(response, 400, { error: "Invalid request" });
     return;
