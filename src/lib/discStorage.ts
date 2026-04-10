@@ -1,7 +1,7 @@
 import type { DISCScores } from "@/components/DISCForm";
 import type { UserInfo } from "@/components/UserInfoForm";
 
-const API_BASE = "/api";
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || "/api").replace(/\/$/, "");
 
 export interface DISCSubmission {
   id: string;

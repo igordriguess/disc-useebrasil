@@ -20,19 +20,8 @@ import {
 } from "@/components/ui/dialog";
 import { hasDISCSubmissionForUser, saveDISCSubmission } from "@/lib/discStorage";
 
-const ADMIN_USERNAME_HASH = "b88976e384cfba350b860fa35d2da623f6ff1c602647b49285de577681f7c894";
-const ADMIN_PASSWORD_HASH = "5b9ccce4a61b723926e42217fed468ee5df71d20b403754dd091e4a90f907518";
 const DUPLICATE_MESSAGE = "DISC já preenchido, entre em contato com o RH";
-
-const hashSha256 = async (value: string) => {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(value);
-  const hashBuffer = await window.crypto.subtle.digest("SHA-256", data);
-
-  return Array.from(new Uint8Array(hashBuffer))
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("");
-};
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || "/api").replace(/\/$/, "");
 
 const Index = () => {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
@@ -105,14 +94,24 @@ const Index = () => {
     try {
       const normalizedUsername = adminUsername.trim();
 
-      const [usernameHash, passwordHash] = await Promise.all([
-        hashSha256(normalizedUsername),
-        hashSha256(adminPassword),
-      ]);
+      const response = await fetch(`${API_BASE}/admin/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: normalizedUsername,
+          password: adminPassword,
+        }),
+      });
 
-      if (usernameHash !== ADMIN_USERNAME_HASH || passwordHash !== ADMIN_PASSWORD_HASH) {
+      if (response.status === 401) {
         toast.error("Credenciais inválidas.");
         return;
+      }
+
+      if (!response.ok) {
+        throw new Error("Falha no login administrativo.");
       }
 
       setAdminDialogOpen(false);
