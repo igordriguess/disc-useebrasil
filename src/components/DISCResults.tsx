@@ -12,6 +12,7 @@ interface DISCResultsProps {
   userInfo: UserInfo;
   onReset: () => void;
   resetButtonLabel?: string;
+  containerClassName?: string;
 }
 
 interface DimensionMeta {
@@ -174,11 +175,21 @@ const clampValue = (value: number, min: number, max: number) => Math.min(max, Ma
 const scoreOpacity = (score: number, min = 0.32, max = 1) => min + (score / 100) * (max - min);
 const mergeUnique = (...groups: string[][]) => Array.from(new Set(groups.flat()));
 
-const DISCResults = ({ scores, userInfo, onReset, resetButtonLabel = "Refazer" }: DISCResultsProps) => {
+const DISCResults = ({
+  scores,
+  userInfo,
+  onReset,
+  resetButtonLabel = "Refazer",
+  containerClassName = "max-w-4xl",
+}: DISCResultsProps) => {
   const sorted = (Object.entries(scores) as [DiscKey, number][]).sort((a, b) => b[1] - a[1]);
   const dominantKey = sorted[0][0];
   const secondaryKey = sorted[1][0];
   const spread = sorted[0][1] - sorted[sorted.length - 1][1];
+  const normalizedSetor = userInfo.setor.trim();
+  const normalizedIdade = userInfo.idade.trim();
+  const hasSetor = Boolean(normalizedSetor);
+  const hasIdade = Boolean(normalizedIdade);
 
   const getProfilePalette = (key: DiscKey) => {
     const isDominant = key === dominantKey;
@@ -308,8 +319,8 @@ const DISCResults = ({ scores, userInfo, onReset, resetButtonLabel = "Refazer" }
         head: [["Indicador", "Valor"]],
         body: [
           ["Nome", `${userInfo.nome} ${userInfo.sobrenome}`],
-          ["Setor", userInfo.setor],
-          ["Idade", userInfo.idade],
+          ...(hasSetor ? [["Setor", normalizedSetor]] : []),
+          ...(hasIdade ? [["Idade", normalizedIdade]] : []),
           ["Perfil predominante", `${dominantProfile.name} (${scores[dominantKey]}%)`],
           ["Fator de apoio", `${secondaryProfile.name} (${scores[secondaryKey]}%)`],
         ],
@@ -397,7 +408,7 @@ const DISCResults = ({ scores, userInfo, onReset, resetButtonLabel = "Refazer" }
 
   return (
     <section className="pb-10 pt-1 md:pb-16 md:pt-4">
-      <div className="container mx-auto max-w-4xl space-y-6 px-4">
+      <div className={`container mx-auto ${containerClassName} space-y-6 px-4`}>
         <div className="space-y-3 text-center animate-fade-in">
           <h2 className="text-2xl font-bold md:text-3xl">
             Avaliação de Perfil <span className="gradient-text">DISC</span>
@@ -408,11 +419,13 @@ const DISCResults = ({ scores, userInfo, onReset, resetButtonLabel = "Refazer" }
             <span className="text-sm font-semibold text-foreground md:text-base">{userInfo.nome} {userInfo.sobrenome}</span>
           </div>
 
-          <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-glass-border/70 bg-secondary/25 px-3 py-1">
-            <Building2 size={14} className="text-muted-foreground" />
-            <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Setor</span>
-            <span className="ml-2 text-xs font-semibold text-foreground">{userInfo.setor}</span>
-          </div>
+          {hasSetor && (
+            <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-glass-border/70 bg-secondary/25 px-3 py-1">
+              <Building2 size={14} className="text-muted-foreground" />
+              <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Setor</span>
+              <span className="ml-2 text-xs font-semibold text-foreground">{normalizedSetor}</span>
+            </div>
+          )}
 
           <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-emerald-500/35 bg-emerald-500/12 px-3 py-1.5">
             <span className="text-sm font-semibold" style={{ color: DOMINANT_PROFILE_COLOR }}>
@@ -424,8 +437,17 @@ const DISCResults = ({ scores, userInfo, onReset, resetButtonLabel = "Refazer" }
         <div className="glass animate-scale-in p-4 md:p-7">
           <h3 className="mb-1 text-center text-sm font-semibold text-foreground">Quadrante</h3>
 
-          <div className="relative mx-auto max-w-3xl">
-            <div className="relative grid h-[240px] grid-cols-2 grid-rows-2 overflow-hidden rounded-2xl border border-glass-border bg-secondary/25 md:h-[320px]">
+          <div className="mb-3 flex flex-wrap items-center justify-center gap-2">
+            <span className="rounded-full border border-emerald-500/35 bg-emerald-500/12 px-3 py-1 text-[11px] font-semibold text-emerald-300">
+              Predominante: {dominantKey}
+            </span>
+            <span className="rounded-full border border-sky-500/35 bg-sky-500/12 px-3 py-1 text-[11px] font-semibold text-sky-300">
+              Apoio: {secondaryKey}
+            </span>
+          </div>
+
+          <div className="relative mx-auto max-w-5xl">
+            <div className="relative grid h-[260px] grid-cols-2 grid-rows-2 overflow-hidden rounded-2xl border border-glass-border bg-secondary/25 md:h-[360px]">
               {quadrantLayout.map((key) => {
                 const meta = dimensionInfo[key];
                 const value = scores[key];
@@ -454,23 +476,31 @@ const DISCResults = ({ scores, userInfo, onReset, resetButtonLabel = "Refazer" }
               <div className="pointer-events-none absolute bottom-0 left-1/2 top-0 w-px bg-foreground/20" />
               <div className="pointer-events-none absolute left-0 right-0 top-1/2 h-px bg-foreground/20" />
 
-              <div className="pointer-events-none absolute bottom-0 top-0 z-10 w-px bg-emerald-400/85" style={{ left: `${dotX}%` }} />
-              <div className="pointer-events-none absolute left-0 right-0 z-10 h-px bg-emerald-400/85" style={{ top: `${dotY}%` }} />
+              <div className="pointer-events-none absolute bottom-0 top-0 z-10 w-px border-l border-dashed border-emerald-400/70" style={{ left: `${dotX}%` }} />
+              <div className="pointer-events-none absolute left-0 right-0 z-10 h-px border-t border-dashed border-emerald-400/70" style={{ top: `${dotY}%` }} />
 
               <div
-                className="pointer-events-none absolute z-20 h-12 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full border border-emerald-400/70 bg-emerald-400/35 blur-[1px]"
+                className="pointer-events-none absolute z-20 h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full border border-emerald-300/45 bg-emerald-400/20"
                 style={{ left: `${dotX}%`, top: `${dotY}%` }}
               />
 
               <div
-                className="pointer-events-none absolute z-30 h-6 w-6 rounded-full border-2 border-background bg-emerald-400 shadow-[0_0_32px_hsl(150_72%_48%_/_0.9)] transition-all duration-700"
+                className="pointer-events-none absolute z-30 h-4 w-4 rounded-full border-2 border-background bg-emerald-400"
                 style={{ left: `${dotX}%`, top: `${dotY}%`, transform: "translate(-50%, -50%)" }}
               />
 
-              <div
-                className="pointer-events-none absolute z-20 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-emerald-300/90 animate-pulse"
-                style={{ left: `${dotX}%`, top: `${dotY}%` }}
-              />
+              <span className="pointer-events-none absolute left-2 top-2 rounded bg-background/55 px-1.5 py-0.5 text-[10px] text-muted-foreground md:text-[11px]">
+                Ritmo acelerado
+              </span>
+              <span className="pointer-events-none absolute bottom-2 left-2 rounded bg-background/55 px-1.5 py-0.5 text-[10px] text-muted-foreground md:text-[11px]">
+                Ritmo estável
+              </span>
+              <span className="pointer-events-none absolute right-2 top-2 rounded bg-background/55 px-1.5 py-0.5 text-[10px] text-muted-foreground md:text-[11px]">
+                Foco em relações
+              </span>
+              <span className="pointer-events-none absolute bottom-2 right-2 rounded bg-background/55 px-1.5 py-0.5 text-[10px] text-muted-foreground md:text-[11px]">
+                Foco em resultados
+              </span>
             </div>
 
           </div>
